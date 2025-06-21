@@ -34,9 +34,9 @@ if (!$riwayat) {
 }
 
 $reference_id = $riwayat['reference_id'];
-$jenis = strtolower(trim($riwayat['jenis'])); // normalisasi lowercase
+$jenis = strtolower(trim($riwayat['jenis']));
 
-// Cek jika jenis adalah 'padi'
+// Jika jenis adalah padi
 if ($jenis === 'padi') {
     $stmt = $koneksi->prepare("SELECT image_url, detected_class, info, rekomendasi FROM scan_padi WHERE id = ?");
     $stmt->bind_param("i", $reference_id);
@@ -48,7 +48,31 @@ if ($jenis === 'padi') {
         json_response(['error' => 'Data scan padi tidak ditemukan'], 404);
     }
 
-    json_response($padi);
+  // Mapping class ke nama tabel
+    $class_raw = strtolower(trim($padi['detected_class']));
+    $class_map = [
+    'bacteria leaf blight' => 'bacterialeafblight',
+    'brown spot' => 'brownspot',
+    'leaf smut' => 'leafsmut'
+];
+
+    $table_name = $class_map[$class_raw] ?? null;
+
+    if ($table_name) {
+        $query = "SELECT id, name_product, isi, harga, image_url, product_url FROM `$table_name`";
+        $produk_result = $koneksi->query($query);
+        $produk_list = [];
+
+        while ($row = $produk_result->fetch_assoc()) {
+        $produk_list[] = $row;
+        }
+
+        $padi['produk_rekomendasi'] = $produk_list;
+    } else {
+        $padi['produk_rekomendasi'] = [];
+    } 
+
+        json_response($padi);
 } else {
     json_response(['error' => "Jenis '$jenis' tidak dikenali atau belum didukung"], 400);
 }
