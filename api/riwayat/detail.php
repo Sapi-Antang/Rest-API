@@ -51,9 +51,9 @@ if ($jenis === 'padi') {
   // Mapping class ke nama tabel
     $class_raw = strtolower(trim($padi['detected_class']));
     $class_map = [
-    'bacteria leaf blight' => 'bacterialeafblight',
-    'brown spot' => 'brownspot',
-    'leaf smut' => 'leafsmut'
+    'bacteria_leaf_blight' => 'bacterialeafblight',
+    'brown_spot' => 'brownspot',
+    'leaf_smut' => 'leafsmut'
 ];
 
     $table_name = $class_map[$class_raw] ?? null;
